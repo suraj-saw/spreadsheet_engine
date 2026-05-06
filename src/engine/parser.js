@@ -147,6 +147,8 @@ class Parser {
       const right = this.term();
       this.assertNotRange(left);
       this.assertNotRange(right);
+      this.assertNumeric(left);
+      this.assertNumeric(right);
       if (op.type === TOKEN_TYPES.PLUS) {
         left = left + right;
       } else {
@@ -166,6 +168,8 @@ class Parser {
       const right = this.unary();
       this.assertNotRange(left);
       this.assertNotRange(right);
+      this.assertNumeric(left);
+      this.assertNumeric(right);
       if (op.type === TOKEN_TYPES.MULTIPLY) {
         left = left * right;
       } else {
@@ -211,11 +215,15 @@ class Parser {
       if (typeof cellVal === 'string' && cellVal.startsWith('#')) {
         throw new Error(`Referenced cell ${token.value} has error: ${cellVal}`);
       }
-      const num = Number(cellVal);
-      if (isNaN(num)) {
-        throw new Error(`Cell ${token.value} contains non-numeric value: "${cellVal}"`);
+      // Return as-is: numbers stay numbers, strings stay strings.
+      // This allows string functions (UPPER, LOWER, LEN, etc.) to work
+      // with text cells. Arithmetic operators will coerce via JS semantics,
+      // and toNumber() in function calls handles explicit conversion.
+      if (typeof cellVal === 'number') {
+        return cellVal;
       }
-      return num;
+      const num = Number(cellVal);
+      return isNaN(num) ? cellVal : num;
     }
 
     if (token.type === TOKEN_TYPES.NAME && this.peekNext().type === TOKEN_TYPES.LPAREN) {
@@ -361,6 +369,12 @@ class Parser {
   assertNotRange(value) {
     if (Array.isArray(value)) {
       throw new Error('Range can only be used inside functions');
+    }
+  }
+
+  assertNumeric(value) {
+    if (typeof value === 'string' && isNaN(Number(value))) {
+      throw new Error(`Cannot use text value "${value}" in arithmetic`);
     }
   }
 
