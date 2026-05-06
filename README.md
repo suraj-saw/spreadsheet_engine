@@ -10,13 +10,21 @@ A React-based spreadsheet grid that supports direct data entry and formula evalu
 - **10×10 editable grid** with columns A–J and rows 1–10
 - **Numeric and text** value entry
 - **Formula support** — start any cell with `=` to enter a formula
+- **Light/Dark themes** with a toolbar toggle and persisted preference
 
 ### Formula Engine
 - Basic arithmetic: `+`, `-`, `*`, `/`
 - Cell references: `=A1+B2`
+- Ranges: `=SUM(A1:B4)`
 - Parentheses: `=(C1+D1)/3`
 - Multiple cell references: `=A1*2+B3-C4`
 - Unary operators: `=-A1`, `=+B2`
+
+### Built-in Functions
+- Math/Stats: `SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`, `ROUND`, `ABS`, `SQRT`, `POWER`
+- Logical: `IF`, `AND`, `OR`, `NOT`
+- Text: `CONCAT`, `LEFT`, `RIGHT`, `LEN`, `UPPER`, `LOWER`
+- Date/Time: `TODAY`, `NOW`, `DATE`, `YEAR`, `MONTH`, `DAY`
 
 ### Dependency Management
 - Automatic dependency tracking via a directed graph
@@ -32,6 +40,9 @@ A React-based spreadsheet grid that supports direct data entry and formula evalu
 - ✅ **Undo/Redo** — full history with `Ctrl+Z` / `Ctrl+Y`
 - ✅ **Formula bar** — view and edit the active cell's formula
 - ✅ **Keyboard navigation** — `Tab` to move between cells, `Enter` to confirm, `Esc` to cancel
+- ✅ **Autocomplete** — formula names and cell references while typing
+- ✅ **Click to insert arguments** — click a cell while editing a formula to insert it; shift-click to create a range
+- ✅ **Function hints** — show expected arguments and current position while typing
 - ✅ **Optimized recalculation** — only affected downstream cells are recomputed
 
 ## Tech Stack
@@ -58,6 +69,9 @@ npm install
 
 # Start the development server
 npm run dev
+
+# (Optional) Use nodemon to restart on file changes
+npm run dev:nodemon
 ```
 
 The app will open at `http://localhost:5173`.
@@ -83,6 +97,13 @@ Change A1 to `10` → B1 becomes **13**, C1 becomes **26** automatically.
 |------|-------|-----------------|
 | A2 | `=B2` | #CIRCULAR |
 | B2 | `=A2` | #CIRCULAR |
+
+| Cell | Input | Displayed Value |
+|------|-------|-----------------|
+| A3 | `1` | 1 |
+| A4 | `2` | 2 |
+| A5 | `3` | 3 |
+| B3 | `=AVERAGE(A3:A5)` | 2 |
 
 ## Architecture
 
