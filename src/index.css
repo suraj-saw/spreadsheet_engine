@@ -1,0 +1,503 @@
+/* ========================================
+   Spreadsheet Engine — Design System
+   ======================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ---- CSS Variables ---- */
+:root {
+  --color-bg: #0f1117;
+  --color-surface: #181a24;
+  --color-surface-hover: #1e2030;
+  --color-surface-active: #252839;
+  --color-border: #2a2d3e;
+  --color-border-focus: #6C63FF;
+  --color-text: #e4e4e7;
+  --color-text-muted: #71717a;
+  --color-text-dim: #52525b;
+  --color-primary: #6C63FF;
+  --color-primary-glow: rgba(108, 99, 255, 0.15);
+  --color-accent: #44D7B6;
+  --color-accent-glow: rgba(68, 215, 182, 0.12);
+  --color-error: #f43f5e;
+  --color-error-bg: rgba(244, 63, 94, 0.08);
+  --color-error-glow: rgba(244, 63, 94, 0.15);
+  --color-circular: #f59e0b;
+  --color-circular-bg: rgba(245, 158, 11, 0.08);
+  --color-circular-glow: rgba(245, 158, 11, 0.15);
+  --color-formula-bg: rgba(108, 99, 255, 0.04);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px var(--color-primary-glow);
+
+  --transition-fast: 120ms ease;
+  --transition-normal: 200ms ease;
+  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---- Reset & Base ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- App Layout ---- */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ---- Toolbar ---- */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toolbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6C63FF, #44D7B6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.toolbar__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.toolbar__hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+}
+
+.toolbar__hint-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--color-surface-active);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  min-width: 20px;
+}
+
+.toolbar__hint-divider {
+  color: var(--color-border);
+  margin: 0 2px;
+}
+
+.toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.toolbar__btn:hover:not(:disabled) {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  border-color: var(--color-text-dim);
+}
+
+.toolbar__btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.toolbar__btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ---- Formula Bar ---- */
+.formula-bar {
+  display: flex;
+  align-items: center;
+  padding: 6px 20px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.formula-bar__cell-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-active);
+  border: 1px solid var(--color-border);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+}
+
+.formula-bar__fx {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--color-text-dim);
+  font-style: italic;
+}
+
+.formula-bar__input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.formula-bar__input:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 2px var(--color-primary-glow);
+}
+
+.formula-bar__input::placeholder {
+  color: var(--color-text-dim);
+}
+
+.formula-bar__result {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-glow);
+  white-space: nowrap;
+}
+
+.formula-bar__result--error {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+/* ---- Grid Wrapper ---- */
+.grid-wrapper {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+/* Custom scrollbar */
+.grid-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.grid-wrapper::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+.grid-wrapper::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.grid-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-dim);
+}
+
+/* ---- Grid ---- */
+.grid {
+  display: grid;
+  min-width: max-content;
+  border-left: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
+}
+
+/* Corner cell (top-left) */
+.grid__corner {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 30;
+}
+
+/* Column headers */
+.grid__col-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+/* Row headers */
+.grid__row-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  font-weight: 600;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  user-select: none;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  min-width: 48px;
+}
+
+/* ---- Cell ---- */
+.cell {
+  position: relative;
+  border-right: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  min-width: 100px;
+  min-height: 34px;
+  transition: background var(--transition-fast);
+}
+
+.cell:hover {
+  background: var(--color-surface-hover);
+}
+
+.cell__input {
+  width: 100%;
+  height: 100%;
+  padding: 6px 8px;
+  border: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  outline: none;
+  transition: all var(--transition-fast);
+  cursor: cell;
+}
+
+.cell__input:focus {
+  background: var(--color-bg);
+  border-color: var(--color-border-focus);
+  box-shadow: inset 0 0 0 1px var(--color-primary-glow), var(--shadow-glow);
+  cursor: text;
+  z-index: 5;
+  position: relative;
+}
+
+/* Formula indicator badge */
+.cell__formula-indicator {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 0.6rem;
+  color: var(--color-primary);
+  opacity: 0.5;
+  font-style: italic;
+  pointer-events: none;
+  line-height: 1;
+}
+
+/* Formula cell (blue tint) */
+.cell--formula .cell__input {
+  background: var(--color-formula-bg);
+}
+
+/* Error cell */
+.cell--error .cell__input {
+  color: var(--color-error);
+  background: var(--color-error-bg);
+}
+
+.cell--error:hover {
+  background: var(--color-error-bg);
+}
+
+.cell--error .cell__input:focus {
+  border-color: var(--color-error);
+  box-shadow: inset 0 0 0 1px var(--color-error-glow), 0 0 16px var(--color-error-glow);
+}
+
+/* Circular cell */
+.cell--circular .cell__input {
+  color: var(--color-circular);
+  background: var(--color-circular-bg);
+}
+
+.cell--circular:hover {
+  background: var(--color-circular-bg);
+}
+
+.cell--circular .cell__input:focus {
+  border-color: var(--color-circular);
+  box-shadow: inset 0 0 0 1px var(--color-circular-glow), 0 0 16px var(--color-circular-glow);
+}
+
+/* ---- Status Bar ---- */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 20px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.status-bar__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-bar__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--color-text-dim);
+}
+
+.status-bar__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.status-bar__right {
+  font-size: 0.72rem;
+  color: var(--color-text-dim);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .toolbar__center {
+    display: none;
+  }
+  
+  .toolbar__title {
+    font-size: 0.95rem;
+  }
+
+  .cell {
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toolbar {
+    padding: 8px 12px;
+  }
+
+  .formula-bar {
+    padding: 4px 12px;
+  }
+
+  .toolbar__btn span {
+    display: none;
+  }
+}
