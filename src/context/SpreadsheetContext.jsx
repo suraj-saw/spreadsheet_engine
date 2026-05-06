@@ -11,6 +11,7 @@ export function SpreadsheetProvider({ children, rows = 10, cols = 10 }) {
   const [version, setVersion] = useState(0); // triggers re-render on changes
   const [undoCount, setUndoCount] = useState(0);
   const [redoCount, setRedoCount] = useState(0);
+  const activeEditorRef = useRef(null);
 
   const engine = engineRef.current;
 
@@ -51,6 +52,31 @@ export function SpreadsheetProvider({ children, rows = 10, cols = 10 }) {
     setRedoCount(engine.redoCount);
   }, [engine]);
 
+  const setActiveEditor = useCallback((cellId, insertRef, canInsertRef) => {
+    activeEditorRef.current = {
+      cellId,
+      insertRef,
+      canInsertRef,
+    };
+  }, []);
+
+  const clearActiveEditor = useCallback((cellId) => {
+    if (activeEditorRef.current?.cellId === cellId) {
+      activeEditorRef.current = null;
+    }
+  }, []);
+
+  const insertReferenceFromClick = useCallback((targetCellId, options = {}) => {
+    const active = activeEditorRef.current;
+    if (!active || active.cellId === targetCellId) return false;
+    if (active.canInsertRef && !active.canInsertRef()) return false;
+    if (active.insertRef) {
+      active.insertRef(targetCellId, options);
+      return true;
+    }
+    return false;
+  }, []);
+
   const contextValue = {
     setCellValue,
     getCellValue,
@@ -64,6 +90,9 @@ export function SpreadsheetProvider({ children, rows = 10, cols = 10 }) {
     version,
     rows,
     cols,
+    setActiveEditor,
+    clearActiveEditor,
+    insertReferenceFromClick,
   };
 
   return (

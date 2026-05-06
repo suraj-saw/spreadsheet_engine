@@ -3,7 +3,7 @@ import { useSpreadsheet } from '../context/SpreadsheetContext';
 /**
  * Toolbar with undo/redo buttons and formula bar info.
  */
-export default function Toolbar() {
+export default function Toolbar({ theme, onToggleTheme }) {
   const { undo, redo, undoCount, redoCount } = useSpreadsheet();
 
   return (
@@ -33,6 +33,13 @@ export default function Toolbar() {
       </div>
 
       <div className="toolbar__right">
+        <button
+          className="toolbar__btn"
+          onClick={onToggleTheme}
+          title="Toggle theme"
+        >
+          {theme === 'dark' ? 'Light' : 'Dark'} Mode
+        </button>
         <button
           className="toolbar__btn"
           onClick={undo}

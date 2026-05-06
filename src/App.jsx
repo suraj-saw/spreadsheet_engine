@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { SpreadsheetProvider, useSpreadsheet } from './context/SpreadsheetContext';
 import Toolbar from './components/Toolbar';
 import FormulaBar from './components/FormulaBar';
@@ -6,6 +6,10 @@ import Grid from './components/Grid';
 
 function SpreadsheetApp() {
   const { undo, redo, rows, cols } = useSpreadsheet();
+  const [theme, setTheme] = useState(() => {
+    const stored = localStorage.getItem('spreadsheet-theme');
+    return stored === 'light' ? 'light' : 'dark';
+  });
 
   // Global keyboard shortcuts
   const handleKeyDown = useCallback((e) => {
@@ -24,9 +28,18 @@ function SpreadsheetApp() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleKeyDown]);
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('spreadsheet-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  }, []);
+
   return (
     <div className="app">
-      <Toolbar />
+      <Toolbar theme={theme} onToggleTheme={toggleTheme} />
       <FormulaBar />
       <Grid />
       <StatusBar rows={rows} cols={cols} />
