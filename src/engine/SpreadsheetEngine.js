@@ -1,4 +1,4 @@
-import { evaluateFormula, extractReferences } from './parser';
+import { evaluateFormula, extractReferences } from './parser.js';
 
 /**
  * SpreadsheetEngine

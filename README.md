@@ -1,129 +1,117 @@
 # Spreadsheet Engine
 
-A React-based spreadsheet grid that supports direct data entry and formula evaluation similar to basic Excel functionality. Users can type values or formulas into any cell, reference other cells in formulas, and see all dependent values update automatically.
-
-![Spreadsheet Engine](https://img.shields.io/badge/React-19-blue) ![Vite](https://img.shields.io/badge/Vite-6-purple) ![License](https://img.shields.io/badge/License-MIT-green)
+A React-based spreadsheet grid with formula evaluation, dependency management, and circular reference detection — similar to basic Excel functionality.
 
 ## Features
 
-### Core
 - **10×10 editable grid** with columns A–J and rows 1–10
-- **Numeric and text** value entry
-- **Formula support** — start any cell with `=` to enter a formula
-- **Light/Dark themes** with a toolbar toggle and persisted preference
+- **Formula support** — arithmetic (`+`, `-`, `*`, `/`), parentheses, cell references
+- **25+ built-in functions** — SUM, AVERAGE, IF, UPPER, CONCAT, and more
+- **Dependency tracking** — automatic cascading recalculation when referenced cells change
+- **Circular reference detection** — displays `#CIRCULAR` instead of freezing
+- **Error handling** — invalid formulas show `#ERROR` without breaking the grid
+- **Undo / Redo** — Ctrl+Z / Ctrl+Y with full history
+- **Autocomplete** — cell references and function names while editing formulas
+- **Dark / Light theme** toggle
 
-### Formula Engine
-- Basic arithmetic: `+`, `-`, `*`, `/`
-- Cell references: `=A1+B2`
-- Ranges: `=SUM(A1:B4)`
-- Parentheses: `=(C1+D1)/3`
-- Multiple cell references: `=A1*2+B3-C4`
-- Unary operators: `=-A1`, `=+B2`
+## Quick Start
 
-### Built-in Functions
-- Math/Stats: `SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`, `ROUND`, `ABS`, `SQRT`, `POWER`
-- Logical: `IF`, `AND`, `OR`, `NOT`
-- Text: `CONCAT`, `LEFT`, `RIGHT`, `LEN`, `UPPER`, `LOWER`
-- Date/Time: `TODAY`, `NOW`, `DATE`, `YEAR`, `MONTH`, `DAY`
+```bash
+# Install dependencies
+npm install
 
-### Dependency Management
-- Automatic dependency tracking via a directed graph
-- Cascading recalculation — updating A1 propagates to B1, C1, etc.
-- Topological sort ensures correct evaluation order
+# Start development server
+npm run dev
 
-### Error Handling
-- **`#CIRCULAR`** — displayed when circular references are detected (e.g., A1→B1→A1)
-- **`#ERROR`** — displayed for invalid formulas, division by zero, or malformed expressions
-- Errors are isolated per-cell and never crash the grid
+# Build for production
+npm run build
+```
 
-### Bonus Features
-- ✅ **Undo/Redo** — full history with `Ctrl+Z` / `Ctrl+Y`
-- ✅ **Formula bar** — view and edit the active cell's formula
-- ✅ **Keyboard navigation** — `Tab` to move between cells, `Enter` to confirm, `Esc` to cancel
-- ✅ **Autocomplete** — formula names and cell references while typing
-- ✅ **Click to insert arguments** — click a cell while editing a formula to insert it; shift-click to create a range
-- ✅ **Function hints** — show expected arguments and current position while typing
-- ✅ **Optimized recalculation** — only affected downstream cells are recomputed
+## Usage
+
+| Action | How |
+|---|---|
+| Enter a value | Click a cell, type a number or text, press **Enter** |
+| Enter a formula | Start with `=` (e.g., `=A1+B2`, `=SUM(A1:A5)`) |
+| Confirm | **Enter** (moves down) or **Tab** (moves right) |
+| Cancel edit | **Esc** |
+| Undo / Redo | **Ctrl+Z** / **Ctrl+Y** |
+
+### Example
+
+1. Set `A1 = 5`
+2. Set `B1 = =A1+3` → displays **8**
+3. Set `C1 = =B1*2` → displays **16**
+4. Change `A1 = 10` → B1 auto-updates to **13**, C1 to **26**
+
+## Project Structure
+
+```
+src/
+├── engine/                    # Core spreadsheet logic (framework-agnostic)
+│   ├── tokenizer.js           # Formula tokenizer
+│   ├── parser.js              # Recursive descent parser + evaluator
+│   ├── builtinFunctions.js    # Built-in function implementations
+│   ├── typeHelpers.js         # Type conversion utilities
+│   ├── rangeUtils.js          # Cell range expansion (A1:C3)
+│   ├── SpreadsheetEngine.js   # Engine: dependencies, undo/redo, recalculation
+│   └── index.js               # Public API re-exports
+├── components/
+│   ├── Cell.jsx               # Individual cell component
+│   ├── CellSuggestions.jsx    # Autocomplete dropdown
+│   ├── Grid.jsx               # 10×10 grid layout
+│   ├── FormulaBar.jsx         # Formula bar (shows active cell)
+│   └── Toolbar.jsx            # Toolbar (undo/redo, theme toggle)
+├── hooks/
+│   └── useCellEditor.js       # Cell editing logic (autocomplete, keyboard nav)
+├── constants/
+│   └── formulaFunctions.js    # Function metadata for autocomplete
+├── utils/
+│   └── formulaHelpers.js      # Pure helpers for formula editing
+├── context/
+│   └── SpreadsheetContext.jsx  # React context bridging engine ↔ UI
+├── App.jsx                    # App shell
+├── main.jsx                   # Entry point
+└── index.css                  # Styles
+```
+
+## Supported Functions
+
+| Category | Functions |
+|---|---|
+| **Math** | `SUM`, `AVERAGE`, `MIN`, `MAX`, `COUNT`, `ROUND`, `ABS`, `SQRT`, `POWER` |
+| **Logic** | `IF`, `AND`, `OR`, `NOT` |
+| **Text** | `CONCAT`, `LEFT`, `RIGHT`, `LEN`, `UPPER`, `LOWER` |
+| **Date** | `TODAY`, `NOW`, `DATE`, `YEAR`, `MONTH`, `DAY` |
+
+## Running Tests
+
+```bash
+# Core engine tests (72 tests)
+node test_engine.mjs
+
+# Edge-case tests (45 tests)
+node test_edge_cases.mjs
+```
+
+## Architecture
+
+The engine is fully client-side with no backend. The core data flow:
+
+```
+User Input → SpreadsheetEngine.setCellValue()
+  → Parse formula (tokenizer → parser → evaluator)
+  → Update dependency graph
+  → Check for circular references
+  → Cascade recalculation to dependents
+  → React re-renders affected cells
+```
 
 ## Tech Stack
 
 - **React 19** — UI framework
-- **Vite 6** — build tool and dev server
-- **Vanilla CSS** — custom dark theme with design tokens
-- **No external dependencies** — formula parser built from scratch (recursive descent)
-
-## Getting Started
-
-### Prerequisites
-- Node.js 18+ and npm
-
-### Installation
-
-```bash
-# Clone the repository
-git clone <repo-url>
-cd spreadsheet_engine
-
-# Install dependencies
-npm install
-
-# Start the development server
-npm run dev
-
-# (Optional) Use nodemon to restart on file changes
-npm run dev:nodemon
-```
-
-The app will open at `http://localhost:5173`.
-
-### Build for Production
-
-```bash
-npm run build
-npm run preview
-```
-
-## Usage Examples
-
-| Cell | Input | Displayed Value |
-|------|-------|-----------------|
-| A1 | `5` | 5 |
-| B1 | `=A1+3` | 8 |
-| C1 | `=B1*2` | 16 |
-
-Change A1 to `10` → B1 becomes **13**, C1 becomes **26** automatically.
-
-| Cell | Input | Displayed Value |
-|------|-------|-----------------|
-| A2 | `=B2` | #CIRCULAR |
-| B2 | `=A2` | #CIRCULAR |
-
-| Cell | Input | Displayed Value |
-|------|-------|-----------------|
-| A3 | `1` | 1 |
-| A4 | `2` | 2 |
-| A5 | `3` | 3 |
-| B3 | `=AVERAGE(A3:A5)` | 2 |
-
-## Architecture
-
-```
-src/
-├── engine/
-│   ├── parser.js          # Tokenizer + recursive descent parser
-│   ├── SpreadsheetEngine.js  # Dependency graph, evaluation, undo/redo
-│   └── index.js           # Barrel export
-├── context/
-│   └── SpreadsheetContext.jsx  # React context + hooks
-├── components/
-│   ├── Cell.jsx           # Individual cell component (memoized)
-│   ├── Grid.jsx           # 10×10 grid layout
-│   ├── Toolbar.jsx        # Undo/redo buttons + shortcuts
-│   └── FormulaBar.jsx     # Active cell formula display
-├── App.jsx                # Main app with keyboard shortcuts
-├── main.jsx               # Entry point
-└── index.css              # Design system + all styles
-```
+- **Vite** — Build tool and dev server
+- **Vanilla CSS** — Styling (dark/light themes)
 
 ## License
 
