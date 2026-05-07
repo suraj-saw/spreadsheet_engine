@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useSpreadsheet } from '../context/SpreadsheetContext';
 
 /**
- * FormulaBar shows the currently focused cell's ID and raw formula/value.
+ * FormulaBar shows the most recently focused cell's ID and raw formula/value.
  * Also allows editing the formula from the bar.
  */
 export default function FormulaBar() {
@@ -10,7 +10,7 @@ export default function FormulaBar() {
   const [activeCellId, setActiveCellId] = useState(null);
   const [barValue, setBarValue] = useState('');
 
-  // Listen for focus events on cells
+  // Listen for focus events on any cell inputs (capture focusin globally).
   const handleGridFocus = useCallback((e) => {
     const cellEl = e.target.closest('[data-cell-id]');
     if (cellEl) {
@@ -19,6 +19,11 @@ export default function FormulaBar() {
       setBarValue(getRawValue(id));
     }
   }, [getRawValue]);
+
+  useEffect(() => {
+    window.addEventListener('focusin', handleGridFocus);
+    return () => window.removeEventListener('focusin', handleGridFocus);
+  }, [handleGridFocus]);
 
   const handleBarChange = useCallback((e) => {
     setBarValue(e.target.value);
@@ -34,7 +39,7 @@ export default function FormulaBar() {
   const hasErr = activeCellId ? isError(activeCellId) : false;
 
   return (
-    <div className="formula-bar" onFocusCapture={handleGridFocus}>
+    <div className="formula-bar">
       <div className="formula-bar__cell-id">
         {activeCellId || '—'}
       </div>

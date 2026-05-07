@@ -24,7 +24,7 @@ export class SpreadsheetEngine {
   }
 
   /**
-   * Get all cell data as a serializable snapshot
+   * Get a snapshot of the current cell data (includes Maps).
    */
   getSnapshot() {
     return {

@@ -87,7 +87,7 @@ src/
 ## Running Tests
 
 ```bash
-# Core engine tests (72 tests)
+# Core engine tests (71 tests)
 node test_engine.mjs
 
 # Edge-case tests (45 tests)

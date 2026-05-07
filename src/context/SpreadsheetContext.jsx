@@ -4,7 +4,7 @@ import { SpreadsheetEngine } from '../engine';
 const SpreadsheetContext = createContext(null);
 
 /**
- * Custom hook that provides the spreadsheet engine and reactive state.
+ * Provider that exposes the spreadsheet engine and reactive state.
  */
 export function SpreadsheetProvider({ children, rows = 10, cols = 10 }) {
   const engineRef = useRef(new SpreadsheetEngine());
